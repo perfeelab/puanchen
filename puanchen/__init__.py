@@ -7,13 +7,13 @@ import pika
 import functools
 
 __name__ = "puanchen"
-__version__ = '0.0.4'
+__version__ = '1.0.0'
 __author__ = 'ClaireHuang'
 __author_email__ = 'clairehf@163.com'
 
 
 class HeraldMQ(object):
-    def __init__(self, host, port, vhost, user, password, heartbeat=0):
+    def __init__(self, host, port, vhost, user, password, heartbeat=60):
         credentials = pika.PlainCredentials(user, password)
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(
             host, port, vhost, credentials, heartbeat=heartbeat
@@ -80,7 +80,7 @@ class SelectConsumer(object):
     EXCHANGE_TYPE = 'direct'
 
     def __init__(self, host, port, vhost, user, password, queue,
-                 consume_func, heartbeat=0):
+                 consume_func, heartbeat=60):
         """
            Create a new instance of the consumer class
         """
@@ -345,6 +345,8 @@ class SelectConsumer(object):
             self.acknowledge_message(basic_deliver.delivery_tag)
         elif result == "requeue":
             self.not_acknowledge_message(basic_deliver.delivery_tag)
+        else:
+            raise Exception("Unknown return value of consume function.")
 
     def acknowledge_message(self, delivery_tag):
         """Acknowledge the message delivery from RabbitMQ by sending a
@@ -423,7 +425,7 @@ class ReconnectingSelectConsumer(object):
     """
 
     def __init__(self, host, port, vhost, user, password, queue, consume_func,
-                 heartbeat=0):
+                 heartbeat=60):
         self._reconnect_delay = 0
 
         self.host = host
