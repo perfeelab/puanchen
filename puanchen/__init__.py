@@ -7,7 +7,7 @@ import pika
 import functools
 
 __name__ = "puanchen"
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __author__ = 'ClaireHuang'
 __author_email__ = 'clairehf@163.com'
 
@@ -22,6 +22,18 @@ class HeraldMQ(object):
 
     def declare_queue(self, queue_name):
         self.channel.queue_declare(queue=queue_name, durable=True)
+
+    def bind_queue(self, queue_name, routing_key, exchange='amq.direct'):
+        self.channel.queue_bind(exchange=exchange, queue=queue_name,
+                                routing_key=routing_key)
+
+    def declare_queue_with_ttl(self, queue_name, routing_key, ttl, exchange='amq.direct'):
+        self.channel.queue_declare(queue=queue_name, durable=True,
+                            arguments={
+                                'x-message-ttl': ttl,
+                                'x-dead-letter-exchange': exchange,
+                                'x-dead-letter-routing-key': routing_key
+                            })
 
     def declare_delay_queue(self, queue_name, ttl):
         delay_queue_name = queue_name + "_delay"
