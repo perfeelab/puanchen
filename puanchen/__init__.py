@@ -7,7 +7,7 @@ import pika
 import functools
 
 __name__ = "puanchen"
-__version__ = '1.0.1'
+__version__ = '1.1.2'
 __author__ = 'ClaireHuang'
 __author_email__ = 'clairehf@163.com'
 
@@ -58,6 +58,11 @@ class HeraldMQ(object):
     def send_delay_message(self, queue_name, body):
         delay_queue_name = queue_name + "_delay"
         self.send_message(delay_queue_name, body)
+
+    def send_ttl_message(self, queue_name, body, ttl):
+        self.channel.basic_publish(
+            exchange='', routing_key=queue_name, body=body,
+            properties=pika.BasicProperties(delivery_mode=2, expiration=ttl))
 
     def close_connection(self):
         self.connection.close()
